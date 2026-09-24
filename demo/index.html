@@ -1,0 +1,81 @@
+<!-- Created by Erion Nezha — © 2026 All rights reserved -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💬 Whatsapp Message Scheduler — Web Port</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0b0f14;color:#e6e6e6;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header.top{background:linear-gradient(135deg,#101820,#1b2a3a);padding:18px 20px;text-align:center;border-bottom:2px solid #00d4ff33}
+header.top h1{font-size:1.25rem;color:#fff}
+header.top p{color:#9fb3c8;font-size:.82rem;margin-top:6px}
+.wrap{flex:1;max-width:1000px;width:100%;margin:0 auto;padding:18px}
+.card{background:#0d1420;border:1px solid #ffffff14;border-radius:10px;padding:18px;margin-bottom:14px}
+.card h2{color:#7fdbff;font-size:1.05rem;margin-bottom:12px}
+input,select,button{font-family:inherit;font-size:.92rem;padding:9px 12px;border-radius:7px;border:1px solid #ffffff22;background:#131c2a;color:#fff;margin:4px 4px 4px 0}
+button{background:#00d4ff;color:#04121a;border:none;font-weight:600;cursor:pointer}
+button:hover{filter:brightness(1.12)}
+button.ghost{background:transparent;border:1px solid #00d4ff66;color:#7fdbff}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.88rem}
+th,td{border:1px solid #ffffff18;padding:8px 10px;text-align:left}
+th{background:#131c2a;color:#7fdbff}
+tr:nth-child(even){background:#ffffff06}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.msg{background:#00d4ff14;border:1px solid #00d4ff44;border-radius:8px;padding:10px 14px;margin:10px 0;font-size:.9rem;color:#bfe9ff}
+footer{text-align:center;padding:14px;color:#5c6b7f;font-size:.85rem;border-top:1px solid #ffffff10}
+footer strong{color:#9fb3c8}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header class="top"><h1>💬 Whatsapp Message Scheduler</h1><p>Web simulation of the pywhatkit script — schedule a WhatsApp message with live countdown.</p></header>
+<div class="wrap">
+
+<div class="card">
+<h2>💬 Schedule a WhatsApp Message</h2>
+<p style="font-size:.88rem;color:#9fb3c8;margin-bottom:12px">Web simulation of <code>pywhatkit.sendwhatmsg(phone, message, hour, minute)</code> — the browser cannot open WhatsApp, so the scheduling logic and countdown are simulated here.</p>
+<input id="ph" placeholder="Phone (e.g. +355 6X XXX XXXX)" style="width:240px">
+<input id="ms" placeholder="Message" style="width:320px">
+<input id="hh" type="number" min="0" max="23" placeholder="HH" style="width:80px">
+<input id="mm" type="number" min="0" max="59" placeholder="MM" style="width:80px">
+<button onclick="schedule()">Schedule Message</button>
+<div class="msg hidden" id="out"></div>
+</div>
+<div class="card">
+<h2>🧾 Equivalent Python code</h2>
+<pre style="font-family:Consolas,monospace;font-size:.85rem;color:#c8ffb0;white-space:pre-wrap">import pywhatkit as kit
+
+kit.sendwhatmsg("+355 6X XXX XXXX", "Hello from the web port!", 13, 10)</pre>
+</div>
+
+</div>
+<footer>Krijuar nga <strong>Erion Nezha</strong> — © 2026</footer>
+<script>
+var timer=null;
+function msg(t){var e=document.getElementById('out');e.innerHTML=t;e.classList.remove('hidden');}
+function schedule(){
+ var ph=document.getElementById('ph').value.trim(),ms=document.getElementById('ms').value.trim();
+ var hh=parseInt(document.getElementById('hh').value,10),mm=parseInt(document.getElementById('mm').value,10);
+ if(!ph||!ms||isNaN(hh)||isNaN(mm)||hh<0||hh>23||mm<0||mm>59){msg('⚠️ Enter phone, message and a valid time (HH 0–23, MM 0–59).');return;}
+ var now=new Date(),target=new Date(now);target.setHours(hh,mm,0,0);
+ if(target<=now)target.setDate(target.getDate()+1); // next day like pywhatkit
+ var diff=Math.floor((target-now)/1000);
+ msg('⏰ Message to <strong>'+ph.replace(/</g,'&lt;')+'</strong> scheduled for '+
+     String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+
+     ' — opens WhatsApp Web and sends automatically (simulated).<br>Countdown: <span id="cd"></span>');
+ if(timer)clearInterval(timer);
+ timer=setInterval(function(){
+  if(diff<=0){clearInterval(timer);
+   msg('✅ <strong>Message sent!</strong><br>kit.sendwhatmsg("'+ph.replace(/</g,'&lt;')+'", "'+ms.replace(/</g,'&lt;')+'", '+hh+', '+mm+')');
+   return;}
+  var h=Math.floor(diff/3600),m=Math.floor((diff%3600)/60),s=diff%60;
+  var el=document.getElementById('cd');
+  if(el)el.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  diff--;
+ },1000);
+}
+</script>
+</body>
+</html>
